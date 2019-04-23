@@ -1,0 +1,37 @@
+# Signal transduction with receptor internalization and transcriptional reg.  #
+begin model
+begin compartments
+  EC  3  20
+  PM  2  2   EC
+  CP  3  9   PM
+end compartments
+
+begin molecule types
+  L()
+  R(Y~0~1)
+  LR()
+end molecule types
+
+begin seed species
+  L()@EC      1000
+  R(Y~0)@PM   1000
+end seed species
+
+       
+begin observables
+  Molecules  L_Tot  L()
+  Molecules  R_Tot  R()
+end observables
+
+begin reaction rules
+  # receptor-ligand binding.
+  L()@EC + R(Y~1)@EC <-> LR()@EC 0.1, 1.0
+  # test transport
+  R(Y~0)@PM <-> R(Y~1)@EC 1.0, 0.1
+end reaction rules  
+end model
+
+# actions #
+generate_network({overwrite=>1})
+writeSBML()  
+simulate({method=>"ssa",t_start=>0,t_end=>1,n_steps=>100})
