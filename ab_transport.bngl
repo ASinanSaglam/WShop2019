@@ -1,0 +1,32 @@
+begin model
+
+begin compartments
+  EC 3 30
+  PM 2 2  EC
+  CP 3 9  PM
+end compartments
+
+begin molecule types
+  A()
+  B()
+end molecule types
+
+begin seed species
+  A()@EC 1000
+end seed species
+
+begin observables
+  Molecules A_ec  A()@EC
+  Molecules A_cp  A()@CP
+  Molecules B_tot B()
+end observables
+
+begin reaction rules
+  @EC:A -> @CP:A 0.1
+  @CP:A -> @CP:B 000.1
+end reaction rules
+
+end model
+
+generate_network({overwrite=>1})
+simulate({method=>"ssa",t_start=>0,t_end=>100})

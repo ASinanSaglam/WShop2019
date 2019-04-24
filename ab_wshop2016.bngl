@@ -1,0 +1,34 @@
+begin model
+
+begin compartments
+  EC 3 30
+  PM 2 2  EC
+  CP 3 9  PM
+end compartments
+
+begin molecule types
+  A(b,d)
+  B(a,Y~0~P)
+end molecule types
+
+begin seed species
+  A(b,d)@EC   1000
+  B(a,Y~0)@PM 1000
+end seed species
+
+begin observables
+  Molecules A_free  A(b)
+  Molecules A_bnd   A(b!1).B(a!1)
+  Molecules B_pho   B(Y~P)
+end observables
+
+begin reaction rules
+  A(b) + B(a) <-> A(b!1).B(a!1) 1.0, 0.1
+  B(a!+,Y~0) -> B(a!+,Y~P) 1.0
+  B(Y~P) -> B(Y~0) 0.1
+end reaction rules
+
+end model
+
+generate_network({overwrite=>1})
+simulate({method=>"ssa",t_start=>0,t_end=>100})

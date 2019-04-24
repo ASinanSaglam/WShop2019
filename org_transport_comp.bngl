@@ -1,0 +1,42 @@
+begin model
+begin compartments
+  CYT  3  1  
+  O1M  2  1  CYT
+  O1V  3  1  O1M
+  O2M  2  1  CYT
+  O2V  3  1  O2M
+end compartments
+
+begin molecule types
+  L(r)
+  R(l)
+end molecule types
+
+begin seed species
+  L(r)@CYT  1000
+  R(l)@O1M  1000
+  R(l)@O2M  1000
+end seed species
+
+begin observables
+  Molecules L   L()
+  Molecules R   R()
+  Molecules LR  R(l!1).L(r!1)
+  Molecules LR1 @O1M:R(l!1).L(r!1)
+  Molecules LR2 @O2M:R(l!1).L(r!1)
+  Molecules L1R1 @O1M:R(l!1).L(r!1)@O1V
+  Molecules L2R2 @O2M:R(l!1).L(r!1)@O2V
+  Molecules L1   L(r)@O1V
+  Molecules L2   L(r)@O2V
+  Molecules Lcyt L()@CYT
+end observables
+
+begin reaction rules
+  L(r) + R(l) <-> R(l!1).L(r!1) 1000, 1000
+  @O1M:R(l!1).L(r!1)@CYT -> @O1M:R(l!1).L(r!1)@O1V 1000
+  @O2M:R(l!1).L(r!1)@CYT -> @O2M:R(l!1).L(r!1)@O2V 1000
+end reaction rules
+end model
+
+generate_network()  
+simulate({method=>"ssa",t_start=>0,t_end=>0.01,n_steps=>100})
