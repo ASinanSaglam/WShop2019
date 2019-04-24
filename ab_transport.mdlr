@@ -1,0 +1,70 @@
+ITERATIONS = 1000
+TIME_STEP = 1e-4
+VACANCY_SEARCH_DISTANCE = 100
+ 
+INCLUDE_FILE = "icogeometry.mdl"
+
+MODIFY_SURFACE_REGIONS
+{
+   EC[wall] {
+      SURFACE_CLASS = reflect
+   }
+   EC[ALL] {
+      SURFACE_CLASS = reflect
+   }
+   CP[PM] {
+      SURFACE_CLASS = reflect
+   }
+   CP[ALL] {
+      SURFACE_CLASS = reflect
+   }
+}
+
+DEFINE_SURFACE_CLASSES
+{
+   reflect {
+   REFLECTIVE = ALL_MOLECULES
+   }
+}
+
+#DEFINE_MOLECULES
+{
+  A() {
+      DIFFUSION_CONSTANT_3D = 1e-4
+  }
+  B() {
+      DIFFUSION_CONSTANT_3D = 1e-4
+  }
+}
+
+#DEFINE_REACTIONS
+{
+   @EC:A() -> @CP:A() [1e8]
+   @CP:A() -> @CP:B() [1e6]
+}
+
+#INSTANTIATE Scene OBJECT
+{
+  EC OBJECT EC {}
+  CP OBJECT CP {
+    PARENT = EC
+    MEMBRANE = PM OBJECT CP[ALL]
+  }
+
+  ligand_rel RELEASE_SITE {
+    SHAPE = Scene.EC[ALL]
+    MOLECULE = A()@EC
+    NUMBER_TO_RELEASE = 1000
+    RELEASE_PROBABILITY = 1
+  }
+}
+ 
+/* Observables bloc */
+#REACTION_DATA_OUTPUT
+{
+   STEP = 1e-4
+
+   {COUNT[@EC:A(), WORLD]} => "./react_data/a_ec.dat"
+   {COUNT[@CP:A(), WORLD]} => "./react_data/a_cp.dat"
+   {COUNT[B(), WORLD]} => "./react_data/b.dat"
+}

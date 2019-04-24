@@ -1,0 +1,80 @@
+ITERATIONS = 1000
+TIME_STEP = 1e-4
+VACANCY_SEARCH_DISTANCE = 100
+ 
+INCLUDE_FILE = "icogeometry.mdl"
+
+MODIFY_SURFACE_REGIONS
+{
+   EC[wall] {
+      SURFACE_CLASS = reflect
+   }
+   EC[ALL] {
+      SURFACE_CLASS = reflect
+   }
+   CP[PM] {
+      SURFACE_CLASS = reflect
+   }
+   CP[ALL] {
+      SURFACE_CLASS = reflect
+   }
+}
+
+DEFINE_SURFACE_CLASSES
+{
+   reflect {
+   REFLECTIVE = ALL_MOLECULES
+   }
+}
+
+#DEFINE_MOLECULES
+{
+  A(b,d) {
+      DIFFUSION_CONSTANT_3D = 1e-4
+  }
+  B(a,Y~0~P) {
+      DIFFUSION_CONSTANT_3D = 1e-4
+  }
+}
+
+#DEFINE_REACTIONS
+{
+   A(b) + B(a) <-> A(b!1).B(a!1) [1e8,1e6]
+   B(a!+,Y~0)   -> B(a!+,Y~P)    [1e8]
+   B(Y~P)       -> B(Y~0)        [1e6]
+}
+
+ 
+#INSTANTIATE Scene OBJECT
+{
+  EC OBJECT EC {}
+  CP OBJECT CP {
+    PARENT = EC
+    MEMBRANE = PM OBJECT CP[ALL]
+  }
+
+  ligand_rel RELEASE_SITE {
+    SHAPE = Scene.EC[ALL] - Scene.CP[ALL]
+    MOLECULE = A(b,d)@EC
+    NUMBER_TO_RELEASE = 1000
+    RELEASE_PROBABILITY = 1
+  }
+
+  receptor_rel RELEASE_SITE {
+    SHAPE = Scene.CP[PM]
+    MOLECULE = B(a,Y~0)@PM
+    NUMBER_TO_RELEASE = 1000 
+    RELEASE_PROBABILITY = 1
+  }
+}
+ 
+/* Observables bloc */
+#REACTION_DATA_OUTPUT
+{
+   STEP = 1e-4
+
+   {COUNT[A(b), WORLD]} => "./react_data/a_free.dat"
+   {COUNT[A(b!1).B(a!1), WORLD]} => "./react_data/ab.dat"
+   {COUNT[B(Y~P), WORLD]} => "./react_data/b_pho.dat"
+   {COUNT[B(Y~0), WORLD]} => "./react_data/b_depho.dat"
+}
