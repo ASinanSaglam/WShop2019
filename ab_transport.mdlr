@@ -64,7 +64,7 @@ DEFINE_SURFACE_CLASSES
 {
    STEP = 1e-6
 
-   {COUNT[@EC:A(), WORLD]} => "./react_data/a_ec.dat"
-   {COUNT[@CP:A(), WORLD]} => "./react_data/a_cp.dat"
+   {COUNT[A()@EC, WORLD]} => "./react_data/a_ec.dat"
+   {COUNT[A()@CP, WORLD]} => "./react_data/a_cp.dat"
    {COUNT[B(), WORLD]} => "./react_data/b.dat"
 }
