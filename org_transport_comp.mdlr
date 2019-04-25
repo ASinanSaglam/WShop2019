@@ -1,0 +1,83 @@
+ITERATIONS = 10000
+TIME_STEP = 1e-4
+VACANCY_SEARCH_DISTANCE = 100
+ 
+INCLUDE_FILE = "icogeometry.mdl"
+
+MODIFY_SURFACE_REGIONS
+{
+   EC[wall] {
+      SURFACE_CLASS = reflect
+   }
+   EC[ALL] {
+      SURFACE_CLASS = reflect
+   }
+   CP[PM] {
+      SURFACE_CLASS = reflect
+   }
+   CP[ALL] {
+      SURFACE_CLASS = reflect
+   }
+}
+
+DEFINE_SURFACE_CLASSES
+{
+   reflect {
+   REFLECTIVE = ALL_MOLECULES
+   }
+}
+
+#DEFINE_MOLECULES
+{
+  A(m) {
+      DIFFUSION_CONSTANT_3D = 1e-3
+  }
+  B(b) {
+      DIFFUSION_CONSTANT_3D = 1e-4
+  }
+  Mem(a) {
+      DIFFUSION_CONSTANT_2D = 1e-4
+  }
+}
+
+#DEFINE_REACTIONS
+{
+   A(m)@EC + Mem(a)@PM -> Mem(a!1)@PM.A(m!1)@EC [1e6]
+   Mem(a!1)@PM.A(m!1)@EC -> Mem(a!1)@PM.A(m!1)@CP [1e6]
+   Mem(a!1)@PM.A(m!1)@CP -> Mem(a)@PM + A(m)@CP [1e6]
+   A(m)@CP -> B(b)@CP [1e6]
+}
+
+#INSTANTIATE Scene OBJECT
+{
+  EC OBJECT EC {}
+  CP OBJECT CP {
+    PARENT = EC
+    MEMBRANE = PM OBJECT CP[ALL]
+  }
+
+  ligand_rel RELEASE_SITE {
+    SHAPE = Scene.EC[ALL] - Scene.CP[ALL]
+    MOLECULE = A(m)@EC
+    NUMBER_TO_RELEASE = 1000
+    RELEASE_PROBABILITY = 1
+  }
+  mem_rel RELEASE_SITE {
+    SHAPE = Scene.CP[PM]
+    MOLECULE = Mem(a)@PM
+    NUMBER_TO_RELEASE = 1000
+    RELEASE_PROBABILITY = 1
+  }
+}
+ 
+/* Observables bloc */
+#REACTION_DATA_OUTPUT
+{
+   STEP = 1e-4
+
+   {COUNT[A(m)@EC, WORLD]} => "./react_data/aec.dat"
+   {COUNT[A(m)@CP, WORLD]} => "./react_data/acp.dat"
+   {COUNT[Mem(a!1)@PM.A(m!1)@EC, WORLD]} => "./react_data/MemA_ec.dat"
+   {COUNT[Mem(a!1)@PM.A(m!1)@CP, WORLD]} => "./react_data/MemA_cp.dat"
+   {COUNT[B(b), WORLD]} => "./react_data/b.dat"
+}

@@ -1,5 +1,5 @@
 ITERATIONS = 1000
-TIME_STEP = 1e-4
+TIME_STEP = 1e-5
 VACANCY_SEARCH_DISTANCE = 100
  
 INCLUDE_FILE = "icogeometry.mdl"
@@ -39,8 +39,8 @@ DEFINE_SURFACE_CLASSES
 
 #DEFINE_REACTIONS
 {
-   @EC:A() -> @CP:A() [1e8]
-   @CP:A() -> @CP:B() [1e6]
+   A()@EC -> A()@CP [1e6]
+   A()@CP -> B()@CP [1e10]
 }
 
 #INSTANTIATE Scene OBJECT
@@ -52,7 +52,7 @@ DEFINE_SURFACE_CLASSES
   }
 
   ligand_rel RELEASE_SITE {
-    SHAPE = Scene.EC[ALL]
+    SHAPE = Scene.EC[ALL] - Scene.CP[ALL]
     MOLECULE = A()@EC
     NUMBER_TO_RELEASE = 1000
     RELEASE_PROBABILITY = 1
@@ -62,7 +62,7 @@ DEFINE_SURFACE_CLASSES
 /* Observables bloc */
 #REACTION_DATA_OUTPUT
 {
-   STEP = 1e-4
+   STEP = 1e-6
 
    {COUNT[@EC:A(), WORLD]} => "./react_data/a_ec.dat"
    {COUNT[@CP:A(), WORLD]} => "./react_data/a_cp.dat"
